@@ -14,6 +14,8 @@ build:
   noarch: python
   skip: true  # [py<310]
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  entry_points:
+    - cython-cmake = cython_cmake.__main__:main
 
 requirements:
   host:
@@ -58,7 +60,11 @@ about:
     the cmake.module entry point for use by scikit-build-core and other
     CMake-based build backends.
   dev_url: https://github.com/scikit-build/cython-cmake
+  doc_url: https://github.com/scikit-build/cython-cmake
 
 extra:
   recipe-maintainers:
     - conda-forge/scikit-build
+  skip-lints:
+    - cython_needs_compiler
+    - python_build_tools_in_host
