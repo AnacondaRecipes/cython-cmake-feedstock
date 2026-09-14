@@ -1,59 +1,63 @@
-context:
-  name: cython-cmake
-  version: "0.3.0"
-  username: scikit-build
+{% set name = "cython-cmake" %}
+{% set version = "0.3.0" %}
 
 package:
-  name: ${{ name|lower }}
-  version: ${{ version }}
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
-  url: https://github.com/${{ username }}/${{ name|lower }}/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: caca45d7c76e6c480a8e7bfb6558d24ca79b97829fbbfab5546ce559b35ddc37
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: 1f6091f8003daf121592601eecddb4c318189232d2d35adf968aa609653a0b4e
 
 build:
-  script: ${{ PYTHON }} -m pip install --no-build-isolation --no-deps -vv .
   number: 0
   noarch: python
+  skip: true  # [py<310]
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
   host:
-    - python ${{ python_min }}.*
+    - python
+    - pip
     - hatchling
     - hatch-vcs
-    - pip
   run:
-    - python >=${{ python_min }}
-    - importlib_resources
+    - python
     - cython
 
-tests:
-  - script:
-      - python -m pytest --durations=20
-    files:
-      source:
-        - tests/
-        - src/
-        - pyproject.toml
-    requirements:
-      run:
-        - ${{ compiler("c") }}
-        - ${{ compiler("cxx") }}
-        - ${{ stdlib("c") }}
-        - python ${{ python_min }}.*
-        - pytest
-        - scikit-build-core
-        - ninja
-        - cmake >=3.21
-        - make
-
+test:
+  requires:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ stdlib('c') }}
+    - pip
+    - pytest
+    - scikit-build-core
+    - ninja
+    - cmake >=3.21
+    - make  # [not win]
+  source_files:
+    - tests
+    - src
+    - pyproject.toml
+  imports:
+    - cython_cmake
+  commands:
+    - pip check
+    - pytest tests -vv --durations=20
 
 about:
-  homepage: https://github.com/scikit-build/cython-cmake
+  home: https://github.com/scikit-build/cython-cmake
   summary: CMake helpers for building Cython modules
   license: Apache-2.0
+  license_family: APACHE
   license_file: LICENSE
-  repository: https://github.com/scikit-build/cython-cmake
+  description: |
+    cython-cmake provides CMake helpers (FindCython and UseCython) for
+    building Cython extension modules, exposed as a CMake package via
+    the cmake.module entry point for use by scikit-build-core and other
+    CMake-based build backends.
+  dev_url: https://github.com/scikit-build/cython-cmake
 
 extra:
   recipe-maintainers:
